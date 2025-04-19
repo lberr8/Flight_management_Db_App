@@ -24,7 +24,8 @@ def initial_menu_loop(choice):
 
     if choice == "1":
         # Add New Flight
-        print("You have chosen: 1 - Add New Flight")
+        add_new_flight(cursor, conn)
+        
         pass
     elif choice == "2":
         # View Flights by Criteria
@@ -58,12 +59,45 @@ def initial_menu_loop(choice):
 choice = print_menu()
 initial_menu_loop(choice)
 
-def add_new_flight():
+def add_new_flight(cursor, conn):
     # ask for each attribute
     # check correct data type had been entered
     # insert record into database
     # display full record when data entry has been completed using select statement to prove it has been entered (WHERE flight_no = x)
 
+    print("You have chosen: 1 - Add New Flight")
+
+    flight_no = input("Please input the flight number: ")
+    # do a check here to make sure the flight number is unique
+
+    departure_date = input("Please enter a departure date in the format YYYY-MM-DD HH:MM:SS: ")
+    # check date is not in the past and it is of correct format
+
+    departure_gate = input("Please enter departure gate: ")
+    # all flight are starting from the same airport so we know what the gate number would be from
+
+    destination = input("Please enter a destination: ")
+    # Need to check if this destination is in the destination table and add if not?
+
+    arrival_date = input("Please enter an arrival date in the format YYYY-MM-DD HH:MM:SS: ")
+    # check arrival date is not before departure data and that it is in the correct format
+    
+    arrival_gate = input("Please enter the arrival gate: ")
+    # this is dependent on the destination airport
+
+    no_passengers = input("Please enter the number of passengers: ")
+    # This would depend on the type of airplane and the number of tickets booked, but we do not have these tables for simplificaiton
+
+    captain = input("Please enter the pilot_id of the captain: ")
+    # maybe display a list of available pilots
+    
+    first_officer = input("Please enter the pilot_id of the first officer: ")
+    # maybe display list of available pilots
+
+    # Note - all flights are initially added as on-time and not-boarding
+
+    cursor.execute(f"INSERT INTO flights VALUES({flight_no, departure_date, departure_gate, destination, arrival_date, arrival_gate, no_passengers, captain, first_officer}, 'on-time', 0)")
+    
     pass
 
 def view_flights_by_criteria():

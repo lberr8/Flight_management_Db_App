@@ -153,14 +153,6 @@ cursor = db_conn.cursor()
 create_tables(cursor)
 initialise_table_data(cursor, db_conn)
 
-results = cursor.execute("SELECT * FROM addresses")
-# for row in cursor:
-#     print("flight_no = ", row[0]) etc
-# or
-# all_flights = results.fetchall()
-# or
-# pprint.pprint(all_flights)
-pprint.pprint(results.fetchall())
 
 
 

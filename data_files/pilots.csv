@@ -1,0 +1,11 @@
+pilot_id,first_name,last_name,dob,license_no,license_valid,rank,phone_number,email,address_id
+1,Sophie,Turner,1982-04-15,123456,1,captain,4471234567,sophie.turner@example.com,11
+2,James,O'Neil,1990-12-03,234567,1,first-officer,4472345678,james.oneil@example.com,12
+3,Luca,Bianchi,1985-07-21,345678,0,captain,4473456789,luca.bianchi@example.com,13
+4,Anna,Kowalska,1992-09-10,456789,1,first-officer,4474567890,anna.kowalska@example.com,14
+5,Thomas,Meyer,1978-11-01,567890,1,captain,4475678901,thomas.meyer@example.com,15
+6,Isabelle,Martin,1989-05-06,678901,0,first-officer,4476789012,isabelle.martin@example.com,16
+7,Daniel,Smith,1983-03-30,789012,1,captain,4477890123,daniel.smith@example.com,17
+8,Emily,Johnson,1995-01-19,890123,1,first-officer,4478901234,emily.johnson@example.com,18
+9,Marc,Dubois,1980-08-25,901234,0,captain,4479012345,marc.dubois@example.com,19
+10,Chloe,Evans,1987-06-12,112233,1,first-officer,4471122334,chloe.evans@example.com,20

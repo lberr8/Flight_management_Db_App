@@ -7,22 +7,6 @@ import csv
 
 DATABASE_FILE = "flight_management"
 
-# conn.execute("DROP TABLE IF EXISTS flights")
-# print("Table flights created successfully")
-
-# conn.execute("DROP TABLE IF EXISTS pilots")
-# print("Table pilots created successfully")
-
-# conn.execute("DROP TABLE IF EXISTS destination")
-# print("Table destination created successfully")
-
-# dates: YYYY-MM-DD ?
-# time: HHMM
-# or date time can be recorded as 'YYYY-MM-DD HH:MM:SS' TEXT
-# passenger_classes: first, business, economy - multiple answers in field possible
-# flight_status: on-time, delayed, cancelled
-# boarding_status: boarding, not_boarding
-# boolean can be recorded as integer with 1 representing true. 
 def create_tables(cursor):
     create_statements = [
         "CREATE TABLE IF NOT EXISTS flights (flight_no INTEGER, departure_date TEXT, departure_gate INTEGER, arrival_date TEXT, no_passengers INTEGER, captain INTEGER, first_officer INTEGER, flight_status TEXT) STRICT",
@@ -44,26 +28,6 @@ def drop_tables(cursor):
 
 
 def initialise_table_data(cursor, conn):
-    tables = ["addresse", "destination"]
-
-    # for flight_data in flights_data:
-    #     cursor.execute(f"INSERT INTO flights VALUES({flight_data})")
-
-    # for pilot_data in pilots_data:
-    #     cursor.execute(f"INSERT INTO flights VALUES({pilot_data})")
-    
-    # for table in tables:
-    #     with open(f'{table}s.csv', 'r') as table_file:
-    #         csv_reader = csv.reader(table_file)
-    #         next(csv_reader)
-
-    #         for row in csv_reader:
-    #             cursor.execute("""INSERT INTO addresses 
-    #                         (address_id, street, city, postcode, country)
-    #                         VALUES(?, ?, ?, ?, ?)""", row)
-            
-    #         print(f"{table} table has been created and initialised with data")
-
     # 1 - addresses
     with open('data_files\\addresses.csv', 'r') as file:
         csv_reader = csv.reader(file)
@@ -145,13 +109,15 @@ def initialise_table_data(cursor, conn):
     
     conn.commit()
 
+if __name__ == "__main__":
 
-db_conn = sqlite3.connect(f"{DATABASE_FILE}.db")
-print("Database has been created")
+    db_conn = sqlite3.connect(f"{DATABASE_FILE}.db")
+    print("Database has been created")
+    # db_conn.execute('PRAGMA foreign_keys = ON') # enable foreign key safety features
 
-cursor = db_conn.cursor()
-create_tables(cursor)
-initialise_table_data(cursor, db_conn)
+    cursor = db_conn.cursor()
+    create_tables(cursor)
+    initialise_table_data(cursor, db_conn)
 
 
 

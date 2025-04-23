@@ -4,6 +4,7 @@ from prettytable import PrettyTable
 conn = sqlite3.connect('flight_management.db')
 cursor = conn.cursor()
 
+# function to display results in tabular formet using prettytable
 def display_results():
     column_names = [x[0] for x in cursor.description]
     rows = cursor.fetchall()
@@ -31,7 +32,7 @@ print("\nDisplaying information for flights where destination is LA")
 cursor.execute("""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
-                      WHERE destinations.name LIKE '%LAX%'""")
+                      WHERE destinations.dest_code LIKE '%LAX%'""")
 display_results()
 
 ### d. multiple criteria at once: destination, flight status and departure date
@@ -39,7 +40,7 @@ print("\nDisplaying information for flights where destination is LA, flight stat
 cursor.execute("""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date, flights.flight_status FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
-                      WHERE destinations.name LIKE '%LAX%' AND flights.flight_status = 'on-time' AND flights.departure_date < '2025-04-25'""")
+                      WHERE destinations.dest_code LIKE '%LAX%' AND flights.flight_status = 'on-time' AND flights.departure_date < '2025-04-25'""")
 display_results()
 
 ################################################################################################################################################################################################################
@@ -163,7 +164,7 @@ display_results()
 ### b. update destination information
 ### bi. update number of gates for dest_id 3 and correct display error in name
 print("\nUpdating airport name and number of gates for destination with dest_id 3:")
-cursor.execute("""UPDATE destinations SET no_of_gates = 32, name = 'Hartsfield-Jackson Atlanta International Airport (ATL)'
+cursor.execute("""UPDATE destinations SET no_of_gates = 32, name = 'Hartsfield-Jackson Atlanta International Airport'
                WHERE dest_id = 3""")
 cursor.execute("""SELECT * from destinations""")
 print("\nDisplaying destinations information after update:")
@@ -172,7 +173,7 @@ conn.commit()
 
 ### bii. add new destination, then delete it
 cursor.execute("""INSERT INTO destinations(dest_id, name, no_of_gates) 
-                        VALUES(?, ?, ?)""", [11,'Josep Tarradellas Barcelona–El Prat Airport [BCN]', 23])
+                        VALUES(?, ?, ?, ?)""", [11,'Josep Tarradellas Barcelona–El Prat Airport', 'BCN', 23])
 cursor.execute("""SELECT * from destinations""")
 print("\nDisplaying destinations information after adding Barcelona airport:")
 display_results()

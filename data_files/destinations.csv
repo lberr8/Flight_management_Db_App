@@ -1,11 +1,11 @@
-dest_id,airport_name, address_id, no_of_gates
-1,Los Angeles International Airport (LAX),1,50
-2,Dallas/Fort Worth International Airport (DFW),2,50
-3,Hartsfield–Jackson Atlanta International Airport (ATL),3,30
-4,San Francisco International Airport (SFO),4,45
-5,Queenstown Airport (ZQN),5,15
-6,Toronto Pearson International Airport (YYZ),6,20
-7,Singapore Changi Airport (SIN),7,54
-8,Frankfurt am Main Airport (FRA),8,35
-9,Helsinki-Vantaa Airport (HEL),9,22
-10,Charles de Gaulle Airport (CDG),10,20
+dest_id,airport_name,dest_code,address_id,no_of_gates
+1,Los Angeles International Airport,LAX,1,50
+2,Dallas/Fort Worth International Airport,DFW,2,50
+3,Hartsfield–Jackson Atlanta International Airport,ATL,3,30
+4,San Francisco International Airport,SFO,4,45
+5,Queenstown Airport,ZQN,5,15
+6,Toronto Pearson International Airport,YYZ,6,20
+7,Singapore Changi Airport,SIN,7,54
+8,Frankfurt am Main Airport,FRA,8,35
+9,Helsinki-Vantaa Airport,HEL,9,22
+10,Charles de Gaulle Airport,CDG,10,20

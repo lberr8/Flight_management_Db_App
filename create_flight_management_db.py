@@ -23,8 +23,9 @@ def create_tables(cursor):
 
 
 # function to drop tables
-def drop_tables(cursor):
-    pass
+def drop_table(cursor, table_name):
+    cursor.execute(f'DROP TABLE {table_name}')
+    print(f"\n{table_name} has been deleted")
 
 
 def initialise_table_data(cursor, conn):
@@ -118,7 +119,7 @@ if __name__ == "__main__":
     cursor = db_conn.cursor()
     create_tables(cursor)
     initialise_table_data(cursor, db_conn)
-
+    drop_table(cursor,'addresses')
 
 
 

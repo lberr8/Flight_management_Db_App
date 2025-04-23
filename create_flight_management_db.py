@@ -9,9 +9,9 @@ def create_tables(cursor):
         rank TEXT, phone_no INTEGER, email TEXT, address_id INTEGER) STRICT""",
         "CREATE TABLE IF NOT EXISTS addresses (address_id INTEGER PRIMARY KEY, street TEXT, city TEXT, postcode TEXT, country TEXT) STRICT",
         "CREATE TABLE IF NOT EXISTS destinations (dest_id INTEGER PRIMARY KEY, name TEXT, dest_code TEXT, address_id INTEGER, no_of_gates INTEGER) STRICT",
-        "CREATE TABLE IF NOT EXISTS arrival_gates (dest_id INTEGER, gate_id INTEGER, flight_no INTEGER) STRICT",
+        "CREATE TABLE IF NOT EXISTS arrival_gates (dest_id INTEGER, gate_id INTEGER, flight_no INTEGER, PRIMARY KEY(dest_id, gate_id, flight_no)) STRICT",
         "CREATE TABLE IF NOT EXISTS passenger_classes (class_id TEXT PRIMARY KEY, name TEXT) STRICT",
-        "CREATE TABLE IF NOT EXISTS flight_class_details (class_id TEXT, flight_no INTEGER) STRICT"
+        "CREATE TABLE IF NOT EXISTS flight_class_details (class_id TEXT, flight_no INTEGER, PRIMARY KEY(class_id, flight_no)) STRICT"
     ]
 
     for statement in create_statements:

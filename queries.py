@@ -172,7 +172,7 @@ display_results()
 conn.commit()
 
 ### bii. add new destination, then delete it
-cursor.execute("""INSERT INTO destinations(dest_id, name, no_of_gates) 
+cursor.execute("""INSERT INTO destinations(dest_id, name, dest_code, no_of_gates) 
                         VALUES(?, ?, ?, ?)""", [11,'Josep Tarradellas Barcelona–El Prat Airport', 'BCN', 23])
 cursor.execute("""SELECT * from destinations""")
 print("\nDisplaying destinations information after adding Barcelona airport:")

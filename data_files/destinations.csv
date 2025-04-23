@@ -1,4 +1,4 @@
-dest_id,airport_name,address_id, no_of_gates
+dest_id,airport_name, address_id, no_of_gates
 1,Los Angeles International Airport (LAX),1,50
 2,Dallas/Fort Worth International Airport (DFW),2,50
 3,Hartsfield–Jackson Atlanta International Airport (ATL),3,30

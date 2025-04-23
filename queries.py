@@ -161,7 +161,6 @@ cursor.execute("""SELECT * from destinations""")
 display_results()
 
 ### b. update destination information
-# REMOVE DESTINATION TO SHOW DELETION?
 ### bi. update number of gates for dest_id 3 and correct display error in name
 print("\nUpdating airport name and number of gates for destination with dest_id 3:")
 cursor.execute("""UPDATE destinations SET no_of_gates = 32, name = 'Hartsfield-Jackson Atlanta International Airport (ATL)'
@@ -172,25 +171,36 @@ display_results()
 conn.commit()
 
 ### bii. add new destination, then delete it
-cursor.execute("""INSERT INTO destinations (dest_id, name, address_id, no_of_gates) 
-                        VALUES(?, ?, ?, ?)""", 11, ,, 23)
+cursor.execute("""INSERT INTO destinations(dest_id, name, no_of_gates) 
+                        VALUES(?, ?, ?)""", [11,'Josep Tarradellas Barcelona–El Prat Airport [BCN]', 23])
+cursor.execute("""SELECT * from destinations""")
+print("\nDisplaying destinations information after adding Barcelona airport:")
+display_results()
+conn.commit()
+
+cursor.execute("DELETE FROM destinations WHERE dest_id = 11")
+cursor.execute("""SELECT * from destinations""")
+print("\nDisplaying destinations information after removing Barcelona airport:")
+display_results()
+conn.commit()
 
 
 ###############################################################################################################################################################################################################################################################################################
 ### 5. Include additional queries that summarise data, such as the number of flights to each destination or the number of flights assigned to a pilot.
 ### a. summarising the number of flights to each destination
-# cursor.execute("""SELECT destinations.name AS destination, COUNT(arrival_gates.flight_no) AS 'number of flights' FROM arrival_gates
-#                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
-#                       GROUP BY destinations.name
-#                       """)
-# print("\nDisplaying number of flights to each destination:")
-# display_results()
+cursor.execute("""SELECT destinations.name AS destination, COUNT(arrival_gates.flight_no) AS 'number of flights' FROM arrival_gates
+                      JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+                      GROUP BY destinations.name
+                      """)
+print("\nDisplaying number of flights to each destination:")
+display_results()
 
-### b. summarising the number of flights assigned to a pilot
-# cursor.execute("""SELECT pilots.pilot_id, CONCAT(pilots.first_name,' ', pilots.last_name) AS name, pilots.rank, COUNT(flights.flight_no) AS 'number of flights' FROM pilots
-#                       JOIN flights
-#                       WHERE pilots.pilot_id = flights.captain OR pilots.pilot_id = flights.first_officer
-#                       GROUP BY pilots.pilot_id
-#                       """)
-# print("\nDisplaying number of flights to assigned to a pilot:")
-# display_results()
+## b. summarising the number of flights assigned to a pilot
+cursor.execute("""SELECT pilots.pilot_id, CONCAT(pilots.first_name,' ', pilots.last_name) AS name, pilots.rank, COUNT(flights.flight_no) AS 'number of flights' FROM pilots
+                      JOIN flights
+                      WHERE pilots.pilot_id = flights.captain OR pilots.pilot_id = flights.first_officer
+                      GROUP BY pilots.pilot_id
+                      """)
+print("\nDisplaying number of flights to assigned to a pilot:")
+display_results()
+

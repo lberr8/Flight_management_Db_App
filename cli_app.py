@@ -1,7 +1,7 @@
+import sqlite3
 from plane_image import plane_art
+from prettytable import PrettyTable
 
-print(plane_art)
-print("Welcome to the Flight Management Database Application")
 
 def print_menu():
     choice = input("""Please select an option:
@@ -55,9 +55,14 @@ def initial_menu_loop(choice):
         print("You have chosen to exit. Goodbye!")
         exit()
 
+def display_results():
+    column_names = [x[0] for x in cursor.description]
+    rows = cursor.fetchall()
 
-choice = print_menu()
-initial_menu_loop(choice)
+    display_table = PrettyTable(column_names)
+    for row in rows:
+        display_table.add_row(row)
+    print(display_table)
 
 def add_new_flight(cursor, conn):
     # ask for each attribute
@@ -67,7 +72,10 @@ def add_new_flight(cursor, conn):
 
     print("You have chosen: 1 - Add New Flight")
 
-    flight_no = input("Please input the flight number: ")
+    # flight_no = cursor.execute("SELECT MAX(flight_no) FROM flights").fetchall()
+    # print(flight_no)
+    
+    # input("Please input the flight number: ")
     # do a check here to make sure the flight number is unique
 
     departure_date = input("Please enter a departure date in the format YYYY-MM-DD HH:MM:SS: ")
@@ -96,8 +104,14 @@ def add_new_flight(cursor, conn):
 
     # Note - all flights are initially added as on-time and not-boarding
 
-    cursor.execute(f"INSERT INTO flights VALUES({flight_no, departure_date, departure_gate, destination, arrival_date, arrival_gate, no_passengers, captain, first_officer}, 'on-time', 0)")
-    
+    cursor.execute(f"""INSERT INTO flights 
+                   VALUES({flight_no, departure_date, departure_gate, destination, arrival_date, arrival_gate, no_passengers, captain, first_officer}, 'on-time', 0)""")
+    cursor.execute("""INSERT INTO destinations(dest_id, name, no_of_gates) 
+                        VALUES(?, ?, ?)""", [11,'Josep Tarradellas Barcelona–El Prat Airport [BCN]', 23])
+    cursor.execute("""SELECT * from destinations""")
+    print("\nDisplaying destinations information after adding Barcelona airport:")
+    display_results()
+    conn.commit()
     pass
 
 def view_flights_by_criteria():
@@ -141,3 +155,12 @@ def update_destination_info():
     # check type
     # similar flow to update flight above
     pass
+
+if __name__ == "__main__":
+    conn = sqlite3.connect('flight_management.db')
+    cursor = conn.cursor()
+
+    print(plane_art)
+    print("Welcome to the Flight Management Database Application")
+    choice = print_menu()
+    initial_menu_loop(choice)

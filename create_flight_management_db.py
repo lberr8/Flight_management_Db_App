@@ -9,12 +9,12 @@ DATABASE_FILE = "flight_management"
 
 def create_tables(cursor):
     create_statements = [
-        "CREATE TABLE IF NOT EXISTS flights (flight_no INTEGER, departure_date TEXT, departure_gate INTEGER, arrival_date TEXT, no_passengers INTEGER, captain INTEGER, first_officer INTEGER, flight_status TEXT) STRICT",
-        "CREATE TABLE IF NOT EXISTS pilots (pilot_id INTEGER, first_name TEXT, last_name TEXT, dob TEXT, license_no INTEGER, license_valid INTEGER, rank TEXT, phone_no INTEGER, email TEXT, address_id INTEGER) STRICT",
-        "CREATE TABLE IF NOT EXISTS addresses (address_id INTEGER, street TEXT, city TEXT, postcode TEXT, country TEXT) STRICT",
-        "CREATE TABLE IF NOT EXISTS destinations (dest_id INTEGER, name TEXT, address_id INTEGER, no_of_gates INTEGER) STRICT",
+        "CREATE TABLE IF NOT EXISTS flights (flight_no INTEGER PRIMARY KEY AUTOINCREMENT, departure_date TEXT, departure_gate INTEGER CHECK(departure_gate < 20), arrival_date TEXT CHECK(arrival_date > departure_date), no_passengers INTEGER, captain INTEGER, first_officer INTEGER, flight_status TEXT) STRICT",
+        "CREATE TABLE IF NOT EXISTS pilots (pilot_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, dob TEXT, license_no INTEGER, license_valid INTEGER, rank TEXT, phone_no INTEGER, email TEXT, address_id INTEGER) STRICT",
+        "CREATE TABLE IF NOT EXISTS addresses (address_id INTEGER PRIMARY KEY, street TEXT, city TEXT, postcode TEXT, country TEXT) STRICT",
+        "CREATE TABLE IF NOT EXISTS destinations (dest_id INTEGER PRIMARY KEY, name TEXT, address_id INTEGER, no_of_gates INTEGER) STRICT",
         "CREATE TABLE IF NOT EXISTS arrival_gates (dest_id INTEGER, gate_id INTEGER, flight_no INTEGER) STRICT",
-        "CREATE TABLE IF NOT EXISTS passenger_classes (class_id TEXT, name TEXT) STRICT",
+        "CREATE TABLE IF NOT EXISTS passenger_classes (class_id TEXT PRIMARY KEY, name TEXT) STRICT",
         "CREATE TABLE IF NOT EXISTS flight_class_details (class_id TEXT, flight_no INTEGER) STRICT"
     ]
 
@@ -22,7 +22,6 @@ def create_tables(cursor):
         cursor.execute(statement)
 
 
-# function to drop tables
 def drop_table(cursor, table_name):
     cursor.execute(f'DROP TABLE {table_name}')
     print(f"\n{table_name} has been deleted")
@@ -106,7 +105,6 @@ def initialise_table_data(cursor, conn):
                         VALUES(?, ?)""", row)
             
         print("flight_class_details table has been created and initialised with data")
-
     
     conn.commit()
 
@@ -119,8 +117,7 @@ if __name__ == "__main__":
     cursor = db_conn.cursor()
     create_tables(cursor)
     initialise_table_data(cursor, db_conn)
-    drop_table(cursor,'addresses')
-
+    # drop_table(cursor, 'addresses') # drop table example
 
 
 

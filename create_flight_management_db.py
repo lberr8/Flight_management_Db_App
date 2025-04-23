@@ -113,14 +113,11 @@ if __name__ == "__main__":
 
     db_conn = sqlite3.connect(f"{DATABASE_FILE}.db")
     print("Database has been created")
-    # db_conn.execute('PRAGMA foreign_keys = ON') # enable foreign key safety features
+    
 
     cursor = db_conn.cursor()
+    # cursor.execute("PRAGMA foreign_keys = ON;") # enable foreign key safety features
+
     create_tables(cursor)
     initialise_table_data(cursor, db_conn)
     # drop_table(cursor, 'addresses') # drop table example
-
-
-
-
-# ref panoto recording

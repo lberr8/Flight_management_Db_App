@@ -30,27 +30,31 @@ def initial_menu_loop(choice):
     elif choice == "2":
         # View Flights by Criteria
         print("You have chosen: 2 - View Flights by Criteria")
+        view_flights_by_criteria(cursor)
         pass
     elif choice == "3":
         # Update Flight Information
         print("You have chosen: 3 - Update Flight Information")
+        update_flight_info(cursor)
         pass
     elif choice == "4":
         # Assign Pilot to Flight
         print("You have chosen:  4 - Assign Pilot to Flight")
+        assign_pilot_to_flight(cursor)
         pass
     elif choice == "5":
         # View Pilot Schedule
         print("You have chosen: 5 - View Pilot Schedule")
+        view_pilot_schedule(cursor)
         pass
     elif choice == "6":
         # View Destination Information
         print("You have chosen: 6 - View Destination Information")
-        pass
+        view_destination_info(cursor)
     elif choice == "7":
         # Update Destination Information
         print("You have chosen: 7 - Update Destination Information")
-        pass
+        update_destination_info(cursor)
     elif choice == "8":
         print("You have chosen to exit. Goodbye!")
         exit()
@@ -114,14 +118,14 @@ def add_new_flight(cursor, conn):
     conn.commit()
     pass
 
-def view_flights_by_criteria():
+def view_flights_by_criteria(cursor):
     # display menu of criteria to add
     # add criteria to select statment
     # there could be a varying amount of criteria, so maybe add criteria to list, then use this list to populate select statement?
     # display result of select statment
     pass
 
-def update_flight_info():
+def update_flight_info(cursor):
     # ask which flight and present list of possible flight_no
     # present menu of what the person can change
     # allow one thing to be changed at once
@@ -130,31 +134,105 @@ def update_flight_info():
     # N - go back to main menu
     # at end display updated record
     pass
+    print("\nFlight no. 1009 has been delayed: it's status and departure time will be updated")
+    cursor.execute("""UPDATE flights SET departure_date = '2025-04-27 19:05', arrival_date = '2025-04-27 23:05', flight_status = 'delayed'
+                    WHERE flight_no = 1009""")
 
-def assign_pilot_to_flight():
+    print("\nDelayed flight no 1010 has been cancelled and will be updated")
+    cursor.execute("""UPDATE flights SET flight_status = 'cancelled'
+                    WHERE flight_no = 1010""")
+
+    print("\nArrival gate for flight 1008 has changed to 7 and will be updated")
+    cursor.execute("""UPDATE arrival_gates SET gate_id = 7
+                    WHERE flight_no = 1008""")
+
+    conn.commit()
+
+    print("\n\nDisplaying updated flight schedule:")
+    cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, 
+                        flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
+                        JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+                        JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+                        """)
+    display_results()
+
+def assign_pilot_to_flight(cursor):
     # ask which pilot from presented list of pilots in table
     # ask which flight from presented list of flights in table
     # check pilot is available
     # if available, add pilot to flight and print update record
     # if not say pilot cannot be assigned and ask if they want to assign another pilot
     pass
+    cursor.execute("""UPDATE flights SET captain = 3, first_officer = 6
+                  WHERE flight_no = 1008""")
+    print("\nFlight schedule updated for flight_no 1008: ")
+    cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.arrival_date, pilots.pilot_id, 
+                        pilots.first_name, pilots.last_name, pilots.rank FROM flights
+                        JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+                        JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+                        JOIN pilots
+                        WHERE (pilots.pilot_id = flights.captain OR pilots.pilot_id = flights.first_officer) AND flights.flight_no = 1008
+                        ORDER BY flights.flight_no
+                        """)
+    display_results()
 
-def view_pilot_schedule():
+    conn.commit()
+
+
+def view_pilot_schedule(cursor):
      # ask which pilot from presented list of pilots in table
      # display pilot_id, flight_no, flight_dest, departure_date and arrival_date and times
     pass
+    cursor.execute("""SELECT pilots.pilot_id, CONCAT(pilots.first_name, ' ',pilots.last_name) AS name, flights.flight_no, destinations.name AS destination, 
+               flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
+                      JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+                      JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+                      JOIN pilots ON pilots.pilot_id = flights.captain
+                      WHERE pilots.first_name = 'Sophie' AND pilots.last_name = 'Turner'
+                      """)
+    print("\nDisplaying flight schedule for pilot Sarah Turner:")
+    display_results()
 
-def view_destination_info():
-    # ask which destination from list of valid desitination ids or if want all to be displayed
-    pass
+def view_destination_info(cursor):
+    print("\nDisplaying destinations information:")
+    cursor.execute("""SELECT destinations.dest_id, destinations.name, destinations.dest_code,
+                   addresses.street, addresses.city, addresses.postcode, addresses.country, destinations.no_of_gates FROM destinations
+                   JOIN addresses ON destinations.address_id = addresses.address_id""")
+    display_results()
 
-def update_destination_info():
+def update_destination_info(cursor):
     # ask which destination from list
     # add destination as an option?
     # present menu of destination fields that can be modified
     # check type
     # similar flow to update flight above
     pass
+    cursor.execute("SELECT dest_id, name, dest_code, no_of_gates FROM destinations")
+    display_results()
+    dest_id = input("\nWhich destination do you want update?  Enter a dest_id from the list above: ")
+
+    max_dest_id = cursor.execute("SELECT MAX(dest_id) FROM destinations").fetchone()[0]
+    
+    while not dest_id.isdigit() or (int(dest_id) < 1 or int(dest_id) > max_dest_id):
+        dest_id = input(f"Please enter a number between 1 and {max_dest_id}: ")
+
+    cursor.execute("SELECT dest_id, name, dest_code, no_of_gates FROM destinations WHERE dest_id = ?", (dest_id))
+    print("\nSelected destination:")
+    display_results()
+    update_choice = input("""Which attribute do you want to update:
+                          1 - Name
+                          2 - destination code
+                          3 - number of gates""")
+    
+    while not update_choice.isdigit() or (int(update_choice) < 1 or int(update_choice) > 3):
+        dest_id = input("Please enter a number between 1 and 3: ")
+
+    updated_entry = input(f"""You have chosen to update {update_choice}.  Please entered the updated information""")
+
+    if 
+        
+    
+
 
 if __name__ == "__main__":
     conn = sqlite3.connect('flight_management.db')
@@ -164,3 +242,13 @@ if __name__ == "__main__":
     print("Welcome to the Flight Management Database Application")
     choice = print_menu()
     initial_menu_loop(choice)
+
+    response = input("would you like to return to the main menu? (y/n): ")
+    while response.lower() == 'y':
+        choice = print_menu()
+        initial_menu_loop(choice)
+        response = input("would you like to return to the main menu? (y/n): ")
+
+    print("Exiting Flight Management Application.....")
+    
+    

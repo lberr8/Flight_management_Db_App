@@ -48,7 +48,8 @@ display_results()
 ### 2. Schedule Modification: Update flight schedules (e.g., change departure time or status)
 
 print("\nDisplaying information for flight schedule before change")
-cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
+cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, 
+                flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                       """)
@@ -62,14 +63,15 @@ print("\nDelayed flight no 1010 has been cancelled and will be updated")
 cursor.execute("""UPDATE flights SET flight_status = 'cancelled'
                   WHERE flight_no = 1010""")
 
-print("\nDeparture gate for flight 1008 has changed to 7 and will be updated")
+print("\nArrival gate for flight 1008 has changed to 7 and will be updated")
 cursor.execute("""UPDATE arrival_gates SET gate_id = 7
                   WHERE flight_no = 1008""")
 
 conn.commit()
 
 print("\n\nDisplaying updated flight schedule:")
-cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
+cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, 
+                    flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                       """)
@@ -80,7 +82,8 @@ display_results()
 ###	3. Pilot Assignment: Assign pilots to flights and retrieve information about pilot schedules.
 ### a. Assign pilots to flights
 print("\nDisplaying pilot information before change:")
-cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.arrival_date, pilots.pilot_id, pilots.first_name, pilots.last_name, pilots.rank FROM flights
+cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.arrival_date, pilots.pilot_id, 
+                    pilots.first_name, pilots.last_name, pilots.rank FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                       JOIN pilots
@@ -101,7 +104,8 @@ display_results()
 cursor.execute("""UPDATE flights SET captain = 3, first_officer = 6
                   WHERE flight_no = 1008""")
 print("\nFlight schedule updated for flight_no 1008: ")
-cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.arrival_date, pilots.pilot_id, pilots.first_name, pilots.last_name, pilots.rank FROM flights
+cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.arrival_date, pilots.pilot_id, 
+                    pilots.first_name, pilots.last_name, pilots.rank FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                       JOIN pilots
@@ -113,7 +117,8 @@ display_results()
 conn.commit()
 
 ### bi. Retrieve information about pilot schedules (all ranks)
-cursor.execute("""SELECT pilots.pilot_id, pilots.first_name, pilots.last_name, flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
+cursor.execute("""SELECT pilots.pilot_id, pilots.first_name, pilots.last_name, flights.flight_no, destinations.name AS destination, 
+               flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                       JOIN pilots
@@ -124,7 +129,8 @@ print("\nDisplaying flight schedules for all pilots:")
 display_results()
 
 ### bii. Retrieve information about pilot schedules (captains only)
-cursor.execute("""SELECT pilots.pilot_id, pilots.first_name, pilots.last_name, flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
+cursor.execute("""SELECT pilots.pilot_id, pilots.first_name, pilots.last_name, flights.flight_no, destinations.name AS destination, 
+               flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                       JOIN pilots ON pilots.pilot_id = flights.captain
@@ -134,7 +140,8 @@ print("\nDisplaying flight schedules for captains:")
 display_results()
 
 ### biii. Retrieve information about pilot schedules (first officer only)
-cursor.execute("""SELECT pilots.pilot_id, pilots.first_name, pilots.last_name, flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
+cursor.execute("""SELECT pilots.pilot_id, pilots.first_name, pilots.last_name, flights.flight_no, destinations.name AS destination, 
+               flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                       JOIN pilots ON pilots.pilot_id = flights.first_officer
@@ -144,7 +151,8 @@ print("\nDisplaying flight schedules for first officers:")
 display_results()
 
 ### biv. Retrieve information about a pilot schedule by name
-cursor.execute("""SELECT pilots.pilot_id, CONCAT(pilots.first_name, ' ',pilots.last_name) AS name, flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
+cursor.execute("""SELECT pilots.pilot_id, CONCAT(pilots.first_name, ' ',pilots.last_name) AS name, flights.flight_no, destinations.name AS destination, 
+               flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                       JOIN pilots ON pilots.pilot_id = flights.captain

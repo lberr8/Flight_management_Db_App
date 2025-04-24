@@ -124,7 +124,89 @@ def view_flights_by_criteria(cursor):
     # add criteria to select statment
     # there could be a varying amount of criteria, so maybe add criteria to list, then use this list to populate select statement?
     # display result of select statment
-    pass
+    choice = input("""\nSelect criteria to view fights by:
+                        1 - Destination
+                        2 - Departure date
+                        3 - flight status
+                        Enter a number between 1 and 3: """)
+    
+    # check user input is valid
+    while not choice.isdigit() or (int(choice) < 1 or int(choice) > 3):
+        choice = input("Please enter a number between 1 and 3: ")
+    
+    attributes = {'1':'destination', '2':'departure date', '3': 'flight status'}
+    col_name = {'1':'destinations.dest_id', '2':'flights.departure_date', '3': 'flights.flight_status'}
+    print(f"\nYou have chosen to view flights by {attributes[choice]}.") 
+    
+    if choice == '1':
+        print("\nDisplaying flights by destination:")
+        cursor.execute("SELECT dest_id, name, dest_code FROM destinations") 
+        display_results()
+        dest_id = input("\nWhich destination do you want to use?  Enter a dest_id from the list above: ")
+    
+        # check user input is valid
+        max_dest_id = cursor.execute("SELECT MAX(dest_id) FROM destinations").fetchone()[0]
+        while not dest_id.isdigit() or (int(dest_id) < 1 or int(dest_id) > max_dest_id):
+            dest_id = input(f"Please enter a number between 1 and {max_dest_id}: ")
+        value = dest_id
+
+    elif choice == '2': 
+        d_date = input("\nPlease enter a date in the format YYYY-MM-DD: ")
+        value = d_date + '%'
+
+        cursor.execute(f"""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date, flights.flight_status FROM flights
+                            JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+                            JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+                            WHERE departure_date LIKE ? """, (value,))
+        display_results()
+
+    elif choice == '3':
+        f_status = input("""\nPlease select a flight status.  
+                        1 - on-time
+                        2 - delayed
+                        3 - cancelled
+                        Enter a number between 1 and 3: """)
+        
+        # check user input is valid
+        while not f_status.isdigit() or (int(f_status) < 1 or int(f_status) > 3):
+            f_status = input("Please enter a number between 1 and 3: ")
+
+        status = {'1':'on-time', '2':'delayed', '3': 'cancelled'}
+        value = status[f_status]
+
+    
+    if choice != '2':
+        cursor.execute(f"""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date, flights.flight_status FROM flights
+                            JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+                            JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+                            WHERE {col_name[choice]} = ? """, (value,))
+        display_results()
+
+    # print("\nDisplaying information for all flights that with a status of 'on-time'")
+    # cursor.execute("SELECT * FROM flights WHERE flight_status = 'on-time' ORDER BY departure_date")
+    # display_results()
+
+    # ### b. departure date
+    # print("\nDisplaying information for all flights that with a departure date of 2025-04-25")
+    # cursor.execute("SELECT * FROM flights WHERE departure_date LIKE '2025-04-25%'")
+    # display_results()
+
+    # ### c. destination
+    # print("\nDisplaying information for flights where destination is LA")
+    # cursor.execute("""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date FROM flights
+    #                     JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+    #                     JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+    #                     WHERE destinations.dest_code LIKE '%LAX%'""")
+    # display_results()
+
+    # ### d. multiple criteria at once: destination, flight status and departure date
+    # print("\nDisplaying information for flights where destination is LA, flight status is on-time that depart before 25/04/2025")
+    # cursor.execute("""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date, flights.flight_status FROM flights
+    #                     JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+    #                     JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+    #                     WHERE destinations.dest_code LIKE '%LAX%' AND flights.flight_status = 'on-time' AND flights.departure_date < '2025-04-25'""")
+    # display_results()
+
 
 ###########################################################################################################################################################################################################
 

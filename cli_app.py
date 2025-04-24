@@ -132,41 +132,134 @@ def update_flight_info(cursor):
     # ask which flight and present list of possible flight_no
     # present menu of what the person can change
     # allow one thing to be changed at once
-    # go back to menu - do you want to change anything else? Y continue in this menu
-    # if no, do you want to change info on another flight? Y - Present list of flight nos again
-    # N - go back to main menu
     # at end display updated record
-    pass
-    print("\nFlight no. 1009 has been delayed: it's status and departure time will be updated")
-    cursor.execute("""UPDATE flights SET departure_date = '2025-04-27 19:05', arrival_date = '2025-04-27 23:05', flight_status = 'delayed'
-                    WHERE flight_no = 1009""")
-
-    print("\nDelayed flight no 1010 has been cancelled and will be updated")
-    cursor.execute("""UPDATE flights SET flight_status = 'cancelled'
-                    WHERE flight_no = 1010""")
-
-    print("\nArrival gate for flight 1008 has changed to 7 and will be updated")
-    cursor.execute("""UPDATE arrival_gates SET gate_id = 7
-                    WHERE flight_no = 1008""")
-
-    conn.commit()
-
-    print("\n\nDisplaying updated flight schedule:")
+    
+    # ask which flight and present list of possible flight_no
     cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, 
-                        flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
+                    flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
                         JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                         JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                         """)
     display_results()
 
+    # get flight number
+    flight_no = input("Which flight do you want to update? Enter flight number from above table: ")
+    
+    # check user input is valid
+    max_flight_no = cursor.execute("SELECT MAX(flight_no) FROM flights").fetchone()[0]
+    while not flight_no.isdigit() or (int(flight_no) < 1001 or int(flight_no) > max_flight_no):
+        flight_no = input(f"Please enter a number between 1001 and {max_flight_no}: ")
+
+    # display chosen flight information and ask which attribute is to be updated
+    cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, 
+                    flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights 
+                   JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+                   JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+                   WHERE flights.flight_no = ?""", (flight_no,))
+    print("\nSelected flight:")
+    display_results()
+    update_choice = input("""Which attribute do you want to update:
+                          1 - destination
+                          2 - departure date
+                          3 - departure gate
+                          4 - arrival date
+                          5 - arrival gate
+                          6 - flight status
+                          Enter a number between 1 and 6: """)
+    
+    # check user input is valid
+    while not update_choice.isdigit() or (int(update_choice) < 1 or int(update_choice) > 6):
+        update_choice = input("Please enter a number between 1 and 6: ")
+
+    attributes = {'1':'destination', '2':'departure date', '3': 'departure gate', '4': 'arrival date', '5': 'arrival gate', '6':'flight status'}
+
+    # get information to be updated
+    if update_choice == '1': # destination
+        cursor.execute("SELECT dest_id, name, dest_code FROM destinations")
+        print(f"\nYou have chosen to update {attributes[update_choice]}.") 
+        display_results()
+        dest_id = input("\nWhich destination do you want to use?  Enter a dest_id from the list above: ")
+    
+        # check user input is valid
+        max_dest_id = cursor.execute("SELECT MAX(dest_id) FROM destinations").fetchone()[0]
+        while not dest_id.isdigit() or (int(dest_id) < 1 or int(dest_id) > max_dest_id):
+            dest_id = input(f"Please enter a number between 1 and {max_dest_id}: ")
+
+        cursor.execute(f"""UPDATE arrival_gates SET dest_id = ? WHERE flight_no = ?""", (dest_id,flight_no,))
+
+    elif update_choice == '2': # departure date
+        print(f"\nYou have chosen to update {attributes[update_choice]}.") 
+        print("\nNew departure date must be before arrival date.  If not, arrival date must be updated before departure date.")
+        d_date = input("\nPlease enter a date in the format YYYY-MM-DD HH:MM: ")
+
+        cursor.execute(f"""UPDATE flights SET departure_date = ? WHERE flight_no = ?""", (d_date,flight_no,))
+
+    elif update_choice == '3': # departure gate
+        print(f"\nYou have chosen to update {attributes[update_choice]}.") 
+        d_gate = input("\nEnter a gate number between 1 and 20: ")
+
+        # check user input is valid
+        while not d_gate.isdigit() or (int(d_gate) < 1 or int(d_gate) > 20):
+            dest_id = input(f"Please enter a number between 1 and 20: ")
+
+        cursor.execute(f"""UPDATE flights SET departure_gate = ? WHERE flight_no = ?""", (d_gate,flight_no,))
+
+    elif update_choice == '4': # arrival date
+        print(f"\nYou have chosen to update {attributes[update_choice]}.") 
+        arr_date = input("\nPlease enter a date in the format YYYY-MM-DD HH:MM: ")
+
+        cursor.execute(f"""UPDATE flights SET arrival_date = ? WHERE flight_no = ?""", (arr_date,flight_no,))
+
+    elif update_choice == '5': # arrival gate
+        print(f"\nYou have chosen to update {attributes[update_choice]}.") 
+        max_gate_no = cursor.execute(f"""SELECT destinations.no_of_gates FROM destinations
+                                     JOIN arrival_gates ON arrival_gates.dest_id = destinations.dest_id
+                                     WHERE arrival_gates.flight_no = ?""", (flight_no,)).fetchone()[0]
+        arr_gate = input(f"\nEnter a gate number between 1 and {max_gate_no}: ")
+
+        # check user input is valid
+        while not arr_gate.isdigit() or (int(arr_gate) < 1 or int(arr_gate) > max_gate_no):
+            dest_id = input(f"Please enter a number between 1 and {max_gate_no}: ")
+
+        cursor.execute(f"""UPDATE arrival_gates SET gate_id = ? WHERE flight_no = ?""", ((arr_gate),flight_no,))
+
+    elif update_choice == '6': # flight status
+        print(f"\nYou have chosen to update {attributes[update_choice]}.") 
+        f_status = input("""\nPlease select a flight status.  
+                        1 - on-time
+                        2 - delayed
+                        3 - cancelled
+                        Enter a number between 1 and 3: """)
+        
+        # check user input is valid
+        while not f_status.isdigit() or (int(f_status) < 1 or int(f_status) > 3):
+            f_status = input("Please enter a number between 1 and 3: ")
+
+        status = {'1':'on-time', '2':'delayed', '3': 'cancelled'}
+
+        cursor.execute("""UPDATE flights SET flight_status = ?
+                  WHERE flight_no = ?""", (status[f_status], flight_no,))
+        
+        
+    # commit changes to database
+    # conn.commit()
+
+    # display updated schedule:
+    print("\n\nDisplaying updated flight schedule:")
+    cursor.execute(f"""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.departure_gate, 
+                        flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
+                        JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+                        JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+                        WHERE flights.flight_no = {flight_no}
+                        """)
+    display_results()
+
+
+
 #####################################################################################################################################################################################################
 
 def assign_pilot_to_flight(cursor):
-    # ask which pilot from presented list of pilots in table
     # ask which flight from presented list of flights in table
-    # check pilot is available
-    # if available, add pilot to flight and print update record
-    # if not say pilot cannot be assigned and ask if they want to assign another pilot
     cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.arrival_date, pilots.pilot_id, 
                         pilots.first_name, pilots.last_name, pilots.rank FROM flights
                         JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
@@ -217,7 +310,7 @@ def assign_pilot_to_flight(cursor):
                         """, (flight_no,))
     display_results()
 
-    # conn.commit()
+    conn.commit()
 
 ##########################################################################################################################################################################################################
 

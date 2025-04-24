@@ -117,6 +117,7 @@ def add_new_flight(cursor, conn):
     display_results()
     conn.commit()
     pass
+############################################################################################################################################################################################################
 
 def view_flights_by_criteria(cursor):
     # display menu of criteria to add
@@ -124,6 +125,8 @@ def view_flights_by_criteria(cursor):
     # there could be a varying amount of criteria, so maybe add criteria to list, then use this list to populate select statement?
     # display result of select statment
     pass
+
+###########################################################################################################################################################################################################
 
 def update_flight_info(cursor):
     # ask which flight and present list of possible flight_no
@@ -156,6 +159,8 @@ def update_flight_info(cursor):
                         """)
     display_results()
 
+#####################################################################################################################################################################################################
+
 def assign_pilot_to_flight(cursor):
     # ask which pilot from presented list of pilots in table
     # ask which flight from presented list of flights in table
@@ -178,20 +183,38 @@ def assign_pilot_to_flight(cursor):
 
     conn.commit()
 
+##########################################################################################################################################################################################################
 
 def view_pilot_schedule(cursor):
      # ask which pilot from presented list of pilots in table
      # display pilot_id, flight_no, flight_dest, departure_date and arrival_date and times
-    pass
-    cursor.execute("""SELECT pilots.pilot_id, CONCAT(pilots.first_name, ' ',pilots.last_name) AS name, flights.flight_no, destinations.name AS destination, 
+    cursor.execute("""SELECT pilot_id, first_name, last_name, rank, license_no, license_valid FROM pilots""")
+    display_results()
+    pilot_choice = input("\nPlease enter the pilot_id for the pilot's schedule that you want to view: ")
+    max_pilot_id = cursor.execute("SELECT MAX(pilot_id) FROM pilots").fetchone()[0]
+    
+    # check user input is valid
+    while not pilot_choice.isdigit() or (int(pilot_choice) < 1 or int(pilot_choice) > max_pilot_id):
+        pilot_choice = input(f"Please enter a number between 1 and {max_pilot_id}: ")
+
+    # get rank of chosen pilot
+    pilot_rank = cursor.execute("SELECT rank FROM pilots WHERE pilot_id = ?", (pilot_choice)).fetchone()[0]
+    if pilot_rank == 'captain':
+        flights_attribute = 'flights.captain'
+    else:
+        flights_attribute = 'flights.first_officer'
+
+    print(f"\nDisplaying schedule for pilot with pilot_id {pilot_choice}:")
+    cursor.execute(f"""SELECT pilots.pilot_id, CONCAT(pilots.first_name, ' ',pilots.last_name) AS name, flights.flight_no, destinations.name AS destination, 
                flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
-                      JOIN pilots ON pilots.pilot_id = flights.captain
-                      WHERE pilots.first_name = 'Sophie' AND pilots.last_name = 'Turner'
-                      """)
-    print("\nDisplaying flight schedule for pilot Sarah Turner:")
+                      JOIN pilots ON pilots.pilot_id = {flights_attribute}
+                      WHERE pilots.pilot_id = ?
+                      """, (pilot_choice))
     display_results()
+
+##########################################################################################################################################################################################################
 
 def view_destination_info(cursor):
     print("\nDisplaying destinations information:")
@@ -199,6 +222,8 @@ def view_destination_info(cursor):
                    addresses.street, addresses.city, addresses.postcode, addresses.country, destinations.no_of_gates FROM destinations
                    JOIN addresses ON destinations.address_id = addresses.address_id""")
     display_results()
+
+############################################################################################################################################################################################################
 
 def update_destination_info(cursor):
     # ask which destination is to be updated
@@ -259,4 +284,5 @@ if __name__ == "__main__":
 
     print("Exiting Flight Management Application.....")
     
+    conn.close()
     

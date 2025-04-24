@@ -201,38 +201,46 @@ def view_destination_info(cursor):
     display_results()
 
 def update_destination_info(cursor):
-    # ask which destination from list
-    # add destination as an option?
-    # present menu of destination fields that can be modified
-    # check type
-    # similar flow to update flight above
-    pass
+    # ask which destination is to be updated
     cursor.execute("SELECT dest_id, name, dest_code, no_of_gates FROM destinations")
     display_results()
     dest_id = input("\nWhich destination do you want update?  Enter a dest_id from the list above: ")
-
     max_dest_id = cursor.execute("SELECT MAX(dest_id) FROM destinations").fetchone()[0]
     
+    # check user input is valid
     while not dest_id.isdigit() or (int(dest_id) < 1 or int(dest_id) > max_dest_id):
         dest_id = input(f"Please enter a number between 1 and {max_dest_id}: ")
 
+    # display chosen destination information and ask which attribute is to be updated
     cursor.execute("SELECT dest_id, name, dest_code, no_of_gates FROM destinations WHERE dest_id = ?", (dest_id))
     print("\nSelected destination:")
     display_results()
     update_choice = input("""Which attribute do you want to update:
                           1 - Name
                           2 - destination code
-                          3 - number of gates""")
+                          3 - number of gates
+                          Enter a number between 1 and 3: """)
     
+    # check user input is valid
     while not update_choice.isdigit() or (int(update_choice) < 1 or int(update_choice) > 3):
         dest_id = input("Please enter a number between 1 and 3: ")
 
-    updated_entry = input(f"""You have chosen to update {update_choice}.  Please entered the updated information""")
+    dest_attributes = {'1':'name', '2':'destination code', '3': 'number of gates'}
+    col_names = {'1':'name', '2':'dest_code', '3': 'no_of_gates'}
 
-    if 
-        
-    
+    # get information to be updated
+    updated_entry = input(f"""You have chosen to update {dest_attributes[update_choice]}.  Please enter the updated information: """)
 
+    print(f"\nUpdating {dest_attributes[update_choice]} for destination with dest_id {dest_id}:")
+    cursor.execute(f"""UPDATE destinations SET {col_names[update_choice]} = ?
+                WHERE dest_id = ?""", (updated_entry, dest_id))
+    cursor.execute("""SELECT * from destinations""")
+    print("\nDisplaying destinations information after update:")
+    display_results()
+    conn.commit()
+            
+##############################################################################################################################################################################################
+# main entry point to application
 
 if __name__ == "__main__":
     conn = sqlite3.connect('flight_management.db')

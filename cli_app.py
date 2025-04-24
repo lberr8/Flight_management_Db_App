@@ -68,62 +68,102 @@ def display_results():
         display_table.add_row(row)
     print(display_table)
 
-def add_new_flight(cursor, conn):
-    # ask for each attribute
-    # check correct data type had been entered
-    # insert record into database
-    # display full record when data entry has been completed using select statement to prove it has been entered (WHERE flight_no = x)
+########################################################################################################################################################################################
 
+def add_new_flight(cursor, conn):
     print("You have chosen: 1 - Add New Flight")
 
-    # flight_no = cursor.execute("SELECT MAX(flight_no) FROM flights").fetchall()
-    # print(flight_no)
-    
-    # input("Please input the flight number: ")
-    # do a check here to make sure the flight number is unique
-
-    departure_date = input("Please enter a departure date in the format YYYY-MM-DD HH:MM:SS: ")
+    # get departure date
+    departure_date = input("\nPlease enter a departure date-time in the format YYYY-MM-DD HH:MM: ")
     # check date is not in the past and it is of correct format
 
-    departure_gate = input("Please enter departure gate: ")
-    # all flight are starting from the same airport so we know what the gate number would be from
+    # get destination gate and check input is valid
+    d_gate = input("\nPlease enter departure gate. Enter a gate number between 1 and 20: ")
+    while not d_gate.isdigit() or (int(d_gate) < 1 or int(d_gate) > 20):
+        d_gate = input(f"Please enter a number between 1 and 20: ")
 
-    destination = input("Please enter a destination: ")
-    # Need to check if this destination is in the destination table and add if not?
+    
+    # get destination and check it is valid
+    cursor.execute("SELECT dest_id, name, dest_code FROM destinations") 
+    display_results()
+    dest_id = input("\nWhich destination do you want to use?  Enter a dest_id from the list above: ")
+    max_dest_id = cursor.execute("SELECT MAX(dest_id) FROM destinations").fetchone()[0]
+    while not dest_id.isdigit() or (int(dest_id) < 1 or int(dest_id) > max_dest_id):
+        dest_id = input(f"Please enter a number between 1 and {max_dest_id}: ")
 
-    arrival_date = input("Please enter an arrival date in the format YYYY-MM-DD HH:MM:SS: ")
+    # get arrival date
+    arrival_date = input("\nPlease enter an arrival date in the format YYYY-MM-DD HH:MM: ")
     # check arrival date is not before departure data and that it is in the correct format
     
-    arrival_gate = input("Please enter the arrival gate: ")
-    # this is dependent on the destination airport
+    # get arrival gate and check it is valid
+    max_gate_no = cursor.execute(f"""SELECT destinations.no_of_gates FROM destinations
+                                     WHERE destinations.dest_id = ?""", (dest_id,)).fetchone()[0]
+    arr_gate = input(f"\nEnter a gate number between 1 and {max_gate_no}: ")
+    while not arr_gate.isdigit() or (int(arr_gate) < 1 or int(arr_gate) > max_gate_no):
+        arr_gate = input(f"Please enter a number between 1 and {max_gate_no}: ")
 
-    no_passengers = input("Please enter the number of passengers: ")
-    # This would depend on the type of airplane and the number of tickets booked, but we do not have these tables for simplificaiton
-
-    captain = input("Please enter the pilot_id of the captain: ")
-    # maybe display a list of available pilots
+    # get number of passengers and check it is valid
+    no_passengers = input("\nPlease enter the number of passengers: ")
+    while not no_passengers.isdigit():
+        no_passengers = input(f"Please enter the number of passengers: ")
     
-    first_officer = input("Please enter the pilot_id of the first officer: ")
-    # maybe display list of available pilots
+    # get captain
+    cursor.execute(f"""SELECT pilot_id, first_name, last_name, rank, license_no, license_valid FROM pilots
+                   WHERE license_valid = 1 AND rank = 'captain'""")
+    print()
+    display_results()
+    captain = input(f"\nPlease enter the pilot_id of the captain from the table above: ")
+    max_pilot_id = cursor.execute("SELECT MAX(pilot_id) FROM pilots WHERE rank='captain'").fetchone()[0]
+    while not captain.isdigit() or (int(captain) < 1 or int(captain) > max_pilot_id):
+        captain = input(f"Please enter a number between 1 and {max_pilot_id}: ")
+    
+    # get first-officer
+    cursor.execute(f"""SELECT pilot_id, first_name, last_name, rank, license_no, license_valid FROM pilots
+                   WHERE license_valid = 1 AND rank = 'first-officer'""")
+    print()
+    display_results()
+    fo = input(f"\nPlease enter the pilot_id of the first-officer from the table above: ")
+    max_pilot_id = cursor.execute("SELECT MAX(pilot_id) FROM pilots WHERE rank='first-officer'").fetchone()[0]
+    while not fo.isdigit() or (int(fo) < 1 or int(fo) > max_pilot_id):
+        fo = input(f"Please enter a number between 1 and {max_pilot_id}: ")
 
-    # Note - all flights are initially added as on-time and not-boarding
+    # add entry to flights table
+    # Note - all flights are initially added as on-time    
+    cursor.execute(f"""INSERT INTO flights (departure_date, departure_gate, arrival_date, no_passengers, captain, first_officer, flight_status)
+                   VALUES(?, ?, ?, ?, ?, ?, 'on-time')""", [departure_date, d_gate, arrival_date, no_passengers, captain, fo])
+    
+    # get the next flight no
+    max_flight_no = cursor.execute("SELECT MAX(flight_no) FROM flights").fetchone()[0]
+        
+    # add entry to arrival_gates table
+    cursor.execute("""INSERT INTO arrival_gates (dest_id, gate_id, flight_no) 
+                        VALUES(?, ?, ?)""", [dest_id,arr_gate, max_flight_no])
 
-    cursor.execute(f"""INSERT INTO flights 
-                   VALUES({flight_no, departure_date, departure_gate, destination, arrival_date, arrival_gate, no_passengers, captain, first_officer}, 'on-time', 0)""")
-    cursor.execute("""INSERT INTO destinations(dest_id, name, no_of_gates) 
-                        VALUES(?, ?, ?)""", [11,'Josep Tarradellas Barcelona–El Prat Airport [BCN]', 23])
-    cursor.execute("""SELECT * from destinations""")
-    print("\nDisplaying destinations information after adding Barcelona airport:")
+    print("\nUpdated flights table:")
+    cursor.execute("SELECT * from flights")
+    display_results()
+    print("\nUpdated arrival_gates table:")
+    cursor.execute("SELECT * FROM arrival_gates")
+    display_results()
+    print("\nUpdated entry: ")
+    cursor.execute(f"""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date, flights.flight_status FROM flights
+                            JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+                            JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+                            WHERE flights.flight_no = {max_flight_no}
+                            """)
+    display_results()
+    print("\nUpdated flight schedule information:")
+    cursor.execute(f"""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date, flights.flight_status FROM flights
+                            JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+                            JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+                            """)
     display_results()
     conn.commit()
-    pass
+
 ############################################################################################################################################################################################################
 
 def view_flights_by_criteria(cursor):
-    # display menu of criteria to add
-    # add criteria to select statment
-    # there could be a varying amount of criteria, so maybe add criteria to list, then use this list to populate select statement?
-    # display result of select statment
+    # display criteria options
     choice = input("""\nSelect criteria to view fights by:
                         1 - Destination
                         2 - Departure date
@@ -153,11 +193,12 @@ def view_flights_by_criteria(cursor):
     elif choice == '2': 
         d_date = input("\nPlease enter a date in the format YYYY-MM-DD: ")
         value = d_date + '%'
-
+        
+        # this query a different format so needs to be done separately
         cursor.execute(f"""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date, flights.flight_status FROM flights
                             JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                             JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
-                            WHERE departure_date LIKE ? """, (value,))
+                            WHERE flights.departure_date LIKE ? """, (value,))
         display_results()
 
     elif choice == '3':
@@ -174,39 +215,13 @@ def view_flights_by_criteria(cursor):
         status = {'1':'on-time', '2':'delayed', '3': 'cancelled'}
         value = status[f_status]
 
-    
+    # display results for choices 1 or 3 as these were same format
     if choice != '2':
         cursor.execute(f"""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date, flights.flight_status FROM flights
                             JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                             JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                             WHERE {col_name[choice]} = ? """, (value,))
         display_results()
-
-    # print("\nDisplaying information for all flights that with a status of 'on-time'")
-    # cursor.execute("SELECT * FROM flights WHERE flight_status = 'on-time' ORDER BY departure_date")
-    # display_results()
-
-    # ### b. departure date
-    # print("\nDisplaying information for all flights that with a departure date of 2025-04-25")
-    # cursor.execute("SELECT * FROM flights WHERE departure_date LIKE '2025-04-25%'")
-    # display_results()
-
-    # ### c. destination
-    # print("\nDisplaying information for flights where destination is LA")
-    # cursor.execute("""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date FROM flights
-    #                     JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
-    #                     JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
-    #                     WHERE destinations.dest_code LIKE '%LAX%'""")
-    # display_results()
-
-    # ### d. multiple criteria at once: destination, flight status and departure date
-    # print("\nDisplaying information for flights where destination is LA, flight status is on-time that depart before 25/04/2025")
-    # cursor.execute("""SELECT flights.flight_no, destinations.name, flights.departure_date, flights.arrival_date, flights.flight_status FROM flights
-    #                     JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
-    #                     JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
-    #                     WHERE destinations.dest_code LIKE '%LAX%' AND flights.flight_status = 'on-time' AND flights.departure_date < '2025-04-25'""")
-    # display_results()
-
 
 ###########################################################################################################################################################################################################
 
@@ -282,7 +297,7 @@ def update_flight_info(cursor):
 
         # check user input is valid
         while not d_gate.isdigit() or (int(d_gate) < 1 or int(d_gate) > 20):
-            dest_id = input(f"Please enter a number between 1 and 20: ")
+            d_gate = input(f"Please enter a number between 1 and 20: ")
 
         cursor.execute(f"""UPDATE flights SET departure_gate = ? WHERE flight_no = ?""", (d_gate,flight_no,))
 
@@ -301,7 +316,7 @@ def update_flight_info(cursor):
 
         # check user input is valid
         while not arr_gate.isdigit() or (int(arr_gate) < 1 or int(arr_gate) > max_gate_no):
-            dest_id = input(f"Please enter a number between 1 and {max_gate_no}: ")
+            arr_gate = input(f"Please enter a number between 1 and {max_gate_no}: ")
 
         cursor.execute(f"""UPDATE arrival_gates SET gate_id = ? WHERE flight_no = ?""", ((arr_gate),flight_no,))
 
@@ -324,7 +339,7 @@ def update_flight_info(cursor):
         
         
     # commit changes to database
-    # conn.commit()
+    conn.commit()
 
     # display updated schedule:
     print("\n\nDisplaying updated flight schedule:")
@@ -365,11 +380,10 @@ def assign_pilot_to_flight(cursor):
     print()
     display_results()
     pilot_choice = input(f"\nPlease enter the pilot_id from the table above for the pilot that you want to assign to flight {flight_no}: ")
-
-    max_pilot_id = cursor.execute("SELECT MAX(pilot_id) FROM pilots").fetchone()[0]
     
     # check user input is valid
     # future impprovement when have more time: check entry valid as may not include all numbers from 1 - 10
+    max_pilot_id = cursor.execute("SELECT MAX(pilot_id) FROM pilots").fetchone()[0]
     while not pilot_choice.isdigit() or (int(pilot_choice) < 1 or int(pilot_choice) > max_pilot_id):
         pilot_choice = input(f"Please enter a number between 1 and {max_pilot_id}: ")
 

@@ -167,28 +167,63 @@ def assign_pilot_to_flight(cursor):
     # check pilot is available
     # if available, add pilot to flight and print update record
     # if not say pilot cannot be assigned and ask if they want to assign another pilot
-    pass
-    cursor.execute("""UPDATE flights SET captain = 3, first_officer = 6
-                  WHERE flight_no = 1008""")
-    print("\nFlight schedule updated for flight_no 1008: ")
     cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.arrival_date, pilots.pilot_id, 
                         pilots.first_name, pilots.last_name, pilots.rank FROM flights
                         JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                         JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                         JOIN pilots
-                        WHERE (pilots.pilot_id = flights.captain OR pilots.pilot_id = flights.first_officer) AND flights.flight_no = 1008
-                        ORDER BY flights.flight_no
+                        WHERE (pilots.pilot_id = flights.captain OR pilots.pilot_id = flights.first_officer)
+                        ORDER BY flights.flight_no, pilots.rank
                         """)
     display_results()
+    flight_no = input("Which flight do you want to assign/re-assign pilot to? Enter flight number from above table: ")
+    max_flight_no = cursor.execute("SELECT MAX(flight_no) FROM flights").fetchone()[0]
+    
+    # check user input is valid
+    while not flight_no.isdigit() or (int(flight_no) < 1001 or int(flight_no) > max_flight_no):
+        flight_no = input(f"Please enter a number between 1001 and {max_flight_no}: ")
 
-    conn.commit()
+    # ask which pilot from list of pilots with valid license
+    # future improvement when have more time: add check that departure dates don't conflict
+    cursor.execute(f"""SELECT pilot_id, first_name, last_name, rank, license_no, license_valid FROM pilots
+                   WHERE  pilots.license_valid = 1""")
+    print()
+    display_results()
+    pilot_choice = input(f"\nPlease enter the pilot_id from the table above for the pilot that you want to assign to flight {flight_no}: ")
+
+    max_pilot_id = cursor.execute("SELECT MAX(pilot_id) FROM pilots").fetchone()[0]
+    
+    # check user input is valid
+    # future impprovement when have more time: check entry valid as may not include all numbers from 1 - 10
+    while not pilot_choice.isdigit() or (int(pilot_choice) < 1 or int(pilot_choice) > max_pilot_id):
+        pilot_choice = input(f"Please enter a number between 1 and {max_pilot_id}: ")
+
+    # get rank of chosen pilot
+    pilot_rank = cursor.execute("SELECT rank FROM pilots WHERE pilot_id = ?", (pilot_choice,)).fetchone()[0]
+    if pilot_rank == 'captain':
+        flights_attribute = 'captain'
+    else:
+        flights_attribute = 'first_officer'
+
+    # assign pilot to flight
+    cursor.execute(f"""UPDATE flights SET {flights_attribute} = ? WHERE flight_no = ?""",(pilot_choice, flight_no) )
+    print(f"\nFlight schedule updated for flight_no {flight_no}: ")
+    cursor.execute("""SELECT flights.flight_no, destinations.name AS destination, flights.departure_date, flights.arrival_date, pilots.pilot_id, 
+                        pilots.first_name, pilots.last_name, pilots.rank FROM flights
+                        JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
+                        JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
+                        JOIN pilots
+                        WHERE (pilots.pilot_id = flights.captain OR pilots.pilot_id = flights.first_officer) AND flights.flight_no = ?
+                        """, (flight_no,))
+    display_results()
+
+    # conn.commit()
 
 ##########################################################################################################################################################################################################
 
 def view_pilot_schedule(cursor):
-     # ask which pilot from presented list of pilots in table
-     # display pilot_id, flight_no, flight_dest, departure_date and arrival_date and times
-    cursor.execute("""SELECT pilot_id, first_name, last_name, rank, license_no, license_valid FROM pilots""")
+     # ask which pilot from presented list of pilots with valid license in table
+    cursor.execute("""SELECT pilot_id, first_name, last_name, rank, license_no, license_valid FROM pilots WHERE license_valid = 1""")
     display_results()
     pilot_choice = input("\nPlease enter the pilot_id for the pilot's schedule that you want to view: ")
     max_pilot_id = cursor.execute("SELECT MAX(pilot_id) FROM pilots").fetchone()[0]
@@ -196,9 +231,10 @@ def view_pilot_schedule(cursor):
     # check user input is valid
     while not pilot_choice.isdigit() or (int(pilot_choice) < 1 or int(pilot_choice) > max_pilot_id):
         pilot_choice = input(f"Please enter a number between 1 and {max_pilot_id}: ")
+    print(pilot_choice)
 
     # get rank of chosen pilot
-    pilot_rank = cursor.execute("SELECT rank FROM pilots WHERE pilot_id = ?", (pilot_choice)).fetchone()[0]
+    pilot_rank = cursor.execute("SELECT rank FROM pilots WHERE pilot_id = ?", (pilot_choice,)).fetchone()[0]
     if pilot_rank == 'captain':
         flights_attribute = 'flights.captain'
     else:
@@ -211,7 +247,7 @@ def view_pilot_schedule(cursor):
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
                       JOIN pilots ON pilots.pilot_id = {flights_attribute}
                       WHERE pilots.pilot_id = ?
-                      """, (pilot_choice))
+                      """, (pilot_choice,))
     display_results()
 
 ##########################################################################################################################################################################################################

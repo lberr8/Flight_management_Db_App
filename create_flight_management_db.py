@@ -1,17 +1,17 @@
-import sqlite3, pprint
+import sqlite3
 import csv
 
 def create_tables(cursor):
     create_statements = [
         """CREATE TABLE IF NOT EXISTS flights (flight_no INTEGER PRIMARY KEY AUTOINCREMENT, departure_date TEXT, departure_gate INTEGER CHECK(departure_gate < 20), 
-        arrival_date TEXT CHECK(arrival_date > departure_date), no_passengers INTEGER, captain INTEGER, first_officer INTEGER, flight_status TEXT) STRICT""",
+        arrival_date TEXT CHECK(arrival_date > departure_date), no_passengers INTEGER, captain INTEGER, first_officer INTEGER, flight_status TEXT)""",
         """CREATE TABLE IF NOT EXISTS pilots (pilot_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, dob TEXT, license_no INTEGER, license_valid INTEGER, 
-        rank TEXT, phone_no INTEGER, email TEXT, address_id INTEGER) STRICT""",
-        "CREATE TABLE IF NOT EXISTS addresses (address_id INTEGER PRIMARY KEY, street TEXT, city TEXT, postcode TEXT NOT NULL, country TEXT NOT NULL) STRICT",
-        "CREATE TABLE IF NOT EXISTS destinations (dest_id INTEGER PRIMARY KEY, name TEXT, dest_code TEXT, address_id INTEGER, no_of_gates INTEGER) STRICT",
-        "CREATE TABLE IF NOT EXISTS arrival_gates (dest_id INTEGER, gate_id INTEGER, flight_no INTEGER, PRIMARY KEY(dest_id, gate_id, flight_no)) STRICT",
-        "CREATE TABLE IF NOT EXISTS passenger_classes (class_id TEXT PRIMARY KEY, name TEXT) STRICT",
-        "CREATE TABLE IF NOT EXISTS flight_class_details (class_id TEXT, flight_no INTEGER, PRIMARY KEY(class_id, flight_no)) STRICT"
+        rank TEXT, phone_no INTEGER, email TEXT, address_id INTEGER)""",
+        "CREATE TABLE IF NOT EXISTS addresses (address_id INTEGER PRIMARY KEY, street TEXT, city TEXT, postcode TEXT NOT NULL, country TEXT NOT NULL)",
+        "CREATE TABLE IF NOT EXISTS destinations (dest_id INTEGER PRIMARY KEY, name TEXT, dest_code TEXT, address_id INTEGER, no_of_gates INTEGER)",
+        "CREATE TABLE IF NOT EXISTS arrival_gates (dest_id INTEGER, gate_id INTEGER, flight_no INTEGER, PRIMARY KEY(dest_id, gate_id, flight_no))",
+        "CREATE TABLE IF NOT EXISTS passenger_classes (class_id TEXT PRIMARY KEY, name TEXT)",
+        "CREATE TABLE IF NOT EXISTS flight_class_details (class_id TEXT, flight_no INTEGER, PRIMARY KEY(class_id, flight_no))"
     ]
 
     for statement in create_statements:
@@ -25,7 +25,7 @@ def drop_table(cursor, table_name):
 
 def initialise_table_data(cursor, conn):
     # 1 - addresses
-    with open('data_files\\addresses.csv', 'r') as file:
+    with open('data_files/addresses.csv', 'r') as file:
         csv_reader = csv.reader(file)
         next(csv_reader)
         for row in csv_reader:
@@ -37,7 +37,7 @@ def initialise_table_data(cursor, conn):
 
     
     # 2 - destinations
-    with open('data_files\\destinations.csv', 'r') as file:
+    with open('data_files/destinations.csv', 'r') as file:
         csv_reader = csv.reader(file)
         next(csv_reader)
         for row in csv_reader:
@@ -48,7 +48,7 @@ def initialise_table_data(cursor, conn):
         print("Destinations table has been created and initialised with data")
 
     # 3 - pilots
-    with open('data_files\\pilots.csv', 'r') as file:
+    with open('data_files/pilots.csv', 'r') as file:
         csv_reader = csv.reader(file)
         next(csv_reader)
         for row in csv_reader:
@@ -59,7 +59,7 @@ def initialise_table_data(cursor, conn):
         print("Pilots table has been created and initialised with data")
 
     # 4 - flights    
-    with open('data_files\\flights.csv', 'r') as file:
+    with open('data_files/flights.csv', 'r') as file:
         csv_reader = csv.reader(file)
         next(csv_reader)
         for row in csv_reader:
@@ -70,7 +70,7 @@ def initialise_table_data(cursor, conn):
         print("Flights table has been created and initialised with data")
 
     # 5 - arrival_gates
-    with open('data_files\\arrival_gates.csv', 'r') as file:
+    with open('data_files/arrival_gates.csv', 'r') as file:
         csv_reader = csv.reader(file)
         next(csv_reader)
         for row in csv_reader:
@@ -81,7 +81,7 @@ def initialise_table_data(cursor, conn):
         print("arrival_gates table has been created and initialised with data")
 
     # 6 - passenger classes
-    with open('data_files\\passenger_classes.csv', 'r') as file:
+    with open('data_files/passenger_classes.csv', 'r') as file:
         csv_reader = csv.reader(file)
         next(csv_reader)
         for row in csv_reader:
@@ -92,7 +92,7 @@ def initialise_table_data(cursor, conn):
         print("passenger_classes table has been created and initialised with data")
 
     # 7 - flight class details
-    with open('data_files\\flight_class_details.csv', 'r') as file:
+    with open('data_files/flight_class_details.csv', 'r') as file:
         csv_reader = csv.reader(file)
         next(csv_reader)
         for row in csv_reader:
@@ -113,7 +113,6 @@ if __name__ == "__main__":
 
     db_conn = sqlite3.connect(f"{DATABASE_FILE}.db")
     print("Database has been created")
-    
 
     cursor = db_conn.cursor()
     # cursor.execute("PRAGMA foreign_keys = ON;") # enable foreign key safety features
@@ -121,3 +120,5 @@ if __name__ == "__main__":
     create_tables(cursor)
     initialise_table_data(cursor, db_conn)
     # drop_table(cursor, 'addresses') # drop table example
+
+    db_conn.close()

@@ -151,7 +151,7 @@ print("\nDisplaying flight schedules for first officers:")
 display_results()
 
 ### biv. Retrieve information about a pilot schedule by name
-cursor.execute("""SELECT pilots.pilot_id, CONCAT(pilots.first_name, ' ',pilots.last_name) AS name, flights.flight_no, destinations.name AS destination, 
+cursor.execute("""SELECT pilots.pilot_id, pilots.first_name|| ' '||pilots.last_name AS name, flights.flight_no, destinations.name AS destination, 
                flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id
@@ -205,7 +205,7 @@ print("\nDisplaying number of flights to each destination:")
 display_results()
 
 ## b. summarising the number of flights assigned to a pilot
-cursor.execute("""SELECT pilots.pilot_id, CONCAT(pilots.first_name,' ', pilots.last_name) AS name, pilots.rank, COUNT(flights.flight_no) AS 'number of flights' FROM pilots
+cursor.execute("""SELECT pilots.pilot_id, pilots.first_name ||' '|| pilots.last_name AS name, pilots.rank, COUNT(flights.flight_no) AS 'number of flights' FROM pilots
                       JOIN flights
                       WHERE pilots.pilot_id = flights.captain OR pilots.pilot_id = flights.first_officer
                       GROUP BY pilots.pilot_id

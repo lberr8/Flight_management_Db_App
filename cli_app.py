@@ -430,7 +430,7 @@ def view_pilot_schedule(cursor):
         flights_attribute = 'flights.first_officer'
 
     print(f"\nDisplaying schedule for pilot with pilot_id {pilot_choice}:")
-    cursor.execute(f"""SELECT pilots.pilot_id, CONCAT(pilots.first_name, ' ',pilots.last_name) AS name, flights.flight_no, destinations.name AS destination, 
+    cursor.execute(f"""SELECT pilots.pilot_id, pilots.first_name ||' ' ||pilots.last_name) AS name, flights.flight_no, destinations.name AS destination, 
                flights.departure_date, flights.departure_gate, flights.arrival_date, arrival_gates.gate_id, flights.flight_status FROM flights
                       JOIN arrival_gates ON flights.flight_no = arrival_gates.flight_no
                       JOIN destinations ON arrival_gates.dest_id = destinations.dest_id

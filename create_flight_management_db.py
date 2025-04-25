@@ -25,82 +25,103 @@ def drop_table(cursor, table_name):
 
 def initialise_table_data(cursor, conn):
     # 1 - addresses
-    with open('data_files/addresses.csv', 'r') as file:
-        csv_reader = csv.reader(file)
-        next(csv_reader)
-        for row in csv_reader:
-            cursor.execute("""INSERT INTO addresses 
-                           (address_id, street, city, postcode, country)
-                           VALUES(?, ?, ?, ?, ?)""", row)
-        
-        print("Addresses table has been created and initialised with data")
+    try:
+        with open('data_files/addresses.csv', 'r') as file:
+            csv_reader = csv.reader(file)
+            next(csv_reader)
+            for row in csv_reader:
+                cursor.execute("""INSERT INTO addresses 
+                            (address_id, street, city, postcode, country)
+                            VALUES(?, ?, ?, ?, ?)""", row)
+            
+            print("Addresses table has been created and initialised with data")
+    except FileNotFoundError:
+        print(f"\nFile not found: data_files/addresses.csv")
 
     
     # 2 - destinations
-    with open('data_files/destinations.csv', 'r') as file:
-        csv_reader = csv.reader(file)
-        next(csv_reader)
-        for row in csv_reader:
-            cursor.execute("""INSERT INTO destinations
-                        (dest_id, name, dest_code, address_id, no_of_gates) 
-                        VALUES(?, ?, ?, ?, ?)""", row)
-            
-        print("Destinations table has been created and initialised with data")
+    try:
+        with open('data_files/destinations.csv', 'r') as file:
+            csv_reader = csv.reader(file)
+            next(csv_reader)
+            for row in csv_reader:
+                cursor.execute("""INSERT INTO destinations
+                            (dest_id, name, dest_code, address_id, no_of_gates) 
+                            VALUES(?, ?, ?, ?, ?)""", row)
+                
+            print("Destinations table has been created and initialised with data")
+    except FileNotFoundError:
+        print(f"\nFile not found: data_files/destinations.csv")
 
     # 3 - pilots
-    with open('data_files/pilots.csv', 'r') as file:
-        csv_reader = csv.reader(file)
-        next(csv_reader)
-        for row in csv_reader:
-            cursor.execute("""INSERT INTO pilots
-                        (pilot_id, first_name, last_name, dob, license_no, license_valid, rank, phone_no, email, address_id) 
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", row)
-            
-        print("Pilots table has been created and initialised with data")
+    try:
+        with open('data_files/pilots.csv', 'r') as file:
+            csv_reader = csv.reader(file)
+            next(csv_reader)
+            for row in csv_reader:
+                cursor.execute("""INSERT INTO pilots
+                            (pilot_id, first_name, last_name, dob, license_no, license_valid, rank, phone_no, email, address_id) 
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", row)
+                
+            print("Pilots table has been created and initialised with data")
+    except FileNotFoundError:
+        print(f"\nFile not found: data_files/pilots.csv")
 
     # 4 - flights    
-    with open('data_files/flights.csv', 'r') as file:
-        csv_reader = csv.reader(file)
-        next(csv_reader)
-        for row in csv_reader:
-            cursor.execute("""INSERT INTO flights
-                        (flight_no, departure_date, departure_gate, arrival_date, no_passengers, captain, first_officer, flight_status) 
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?)""", row)
-            
-        print("Flights table has been created and initialised with data")
+    try:
+        with open('data_files/flights.csv', 'r') as file:
+            csv_reader = csv.reader(file)
+            next(csv_reader)
+            for row in csv_reader:
+                cursor.execute("""INSERT INTO flights
+                            (flight_no, departure_date, departure_gate, arrival_date, no_passengers, captain, first_officer, flight_status) 
+                            VALUES(?, ?, ?, ?, ?, ?, ?, ?)""", row)
+                
+            print("Flights table has been created and initialised with data")
+    except FileNotFoundError:
+        print(f"\nFile not found: data_files/flights.csv")
 
     # 5 - arrival_gates
-    with open('data_files/arrival_gates.csv', 'r') as file:
-        csv_reader = csv.reader(file)
-        next(csv_reader)
-        for row in csv_reader:
-            cursor.execute("""INSERT INTO arrival_gates
-                        (dest_id, gate_id, flight_no) 
-                        VALUES(?, ?, ?)""", row)
-            
-        print("arrival_gates table has been created and initialised with data")
+    try:
+        with open('data_files/arrival_gates.csv', 'r') as file:
+            csv_reader = csv.reader(file)
+            next(csv_reader)
+            for row in csv_reader:
+                cursor.execute("""INSERT INTO arrival_gates
+                            (dest_id, gate_id, flight_no) 
+                            VALUES(?, ?, ?)""", row)
+                
+            print("arrival_gates table has been created and initialised with data")
+    except FileNotFoundError:
+        print(f"\nFile not found: data_files/arrival_gates.csv")
 
     # 6 - passenger classes
-    with open('data_files/passenger_classes.csv', 'r') as file:
-        csv_reader = csv.reader(file)
-        next(csv_reader)
-        for row in csv_reader:
-            cursor.execute("""INSERT INTO passenger_classes
-                        (class_id, name) 
-                        VALUES(?, ?)""", row)
-            
-        print("passenger_classes table has been created and initialised with data")
+    try:
+        with open('data_files/passenger_classes.csv', 'r') as file:
+            csv_reader = csv.reader(file)
+            next(csv_reader)
+            for row in csv_reader:
+                cursor.execute("""INSERT INTO passenger_classes
+                            (class_id, name) 
+                            VALUES(?, ?)""", row)
+                
+            print("passenger_classes table has been created and initialised with data")
+    except FileNotFoundError:
+        print(f"\nFile not found: data_files/passenger_classes.csv")
 
     # 7 - flight class details
-    with open('data_files/flight_class_details.csv', 'r') as file:
-        csv_reader = csv.reader(file)
-        next(csv_reader)
-        for row in csv_reader:
-            cursor.execute("""INSERT INTO flight_class_details
-                        (class_id, flight_no) 
-                        VALUES(?, ?)""", row)
-            
-        print("flight_class_details table has been created and initialised with data")
+    try:
+        with open('data_files/flight_class_details.csv', 'r') as file:
+            csv_reader = csv.reader(file)
+            next(csv_reader)
+            for row in csv_reader:
+                cursor.execute("""INSERT INTO flight_class_details
+                            (class_id, flight_no) 
+                            VALUES(?, ?)""", row)
+                
+            print("flight_class_details table has been created and initialised with data")
+    except FileNotFoundError:
+        print(f"\nFile not found: data_files/flight_class_details.csv")
     
     conn.commit()
 

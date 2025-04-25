@@ -3,15 +3,23 @@ import csv
 
 def create_tables(cursor):
     create_statements = [
-        """CREATE TABLE IF NOT EXISTS flights (flight_no INTEGER PRIMARY KEY AUTOINCREMENT, departure_date TEXT, departure_gate INTEGER CHECK(departure_gate < 20), 
-        arrival_date TEXT CHECK(arrival_date > departure_date), no_passengers INTEGER, captain INTEGER, first_officer INTEGER, flight_status TEXT)""",
+        """CREATE TABLE IF NOT EXISTS flights (flight_no INTEGER PRIMARY KEY AUTOINCREMENT, departure_date TEXT, departure_gate INTEGER CHECK(departure_gate < 21), 
+        arrival_date TEXT CHECK(arrival_date > departure_date), no_passengers INTEGER, captain INTEGER, first_officer INTEGER, flight_status TEXT, 
+        FOREIGN KEY (captain) REFERENCES pilots (pilot_id) ON UPDATE SET NULL ON DELETE SET NULL,
+        FOREIGN KEY (first_officer) REFERENCES pilots (pilot_id) ON UPDATE SET NULL ON DELETE SET NULL)""",
         """CREATE TABLE IF NOT EXISTS pilots (pilot_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, dob TEXT, license_no INTEGER, license_valid INTEGER, 
-        rank TEXT, phone_no INTEGER, email TEXT, address_id INTEGER)""",
-        "CREATE TABLE IF NOT EXISTS addresses (address_id INTEGER PRIMARY KEY, street TEXT, city TEXT, postcode TEXT NOT NULL, country TEXT NOT NULL)",
-        "CREATE TABLE IF NOT EXISTS destinations (dest_id INTEGER PRIMARY KEY, name TEXT, dest_code TEXT, address_id INTEGER, no_of_gates INTEGER)",
-        "CREATE TABLE IF NOT EXISTS arrival_gates (dest_id INTEGER, gate_id INTEGER, flight_no INTEGER, PRIMARY KEY(dest_id, gate_id, flight_no))",
-        "CREATE TABLE IF NOT EXISTS passenger_classes (class_id TEXT PRIMARY KEY, name TEXT)",
-        "CREATE TABLE IF NOT EXISTS flight_class_details (class_id TEXT, flight_no INTEGER, PRIMARY KEY(class_id, flight_no))"
+        rank TEXT, phone_no INTEGER, email TEXT, address_id INTEGER,
+        FOREIGN KEY (address_id) REFERENCES addresses (address_id) ON UPDATE SET NULL ON DELETE SET NULL)""",
+        """CREATE TABLE IF NOT EXISTS addresses (address_id INTEGER PRIMARY KEY, street TEXT, city TEXT, postcode TEXT NOT NULL, country TEXT NOT NULL)""",
+        """CREATE TABLE IF NOT EXISTS destinations (dest_id INTEGER PRIMARY KEY, name TEXT, dest_code TEXT, address_id INTEGER, no_of_gates INTEGER,
+        FOREIGN KEY (address_id) REFERENCES addresses (address_id) ON UPDATE SET NULL ON DELETE SET NULL)""",
+        """CREATE TABLE IF NOT EXISTS arrival_gates (dest_id INTEGER, gate_id INTEGER, flight_no INTEGER, PRIMARY KEY(dest_id, gate_id, flight_no),
+        FOREIGN KEY (dest_id) REFERENCES destinations (dest_id) ON UPDATE SET NULL ON DELETE SET NULL,
+        FOREIGN KEY (flight_no) REFERENCES flights (flight_no) ON UPDATE SET NULL ON DELETE SET NULL)""",
+        """CREATE TABLE IF NOT EXISTS passenger_classes (class_id TEXT PRIMARY KEY, name TEXT)""",
+        """CREATE TABLE IF NOT EXISTS flight_class_details (class_id TEXT, flight_no INTEGER, PRIMARY KEY(class_id, flight_no),
+        FOREIGN KEY (class_id) REFERENCES passenger_classes (class_id) ON UPDATE SET NULL ON DELETE SET NULL,
+        FOREIGN KEY (flight_no) REFERENCES flights (flight_no) ON UPDATE SET NULL ON DELETE SET NULL)"""
     ]
 
     for statement in create_statements:
@@ -136,7 +144,7 @@ if __name__ == "__main__":
     print("Database has been created")
 
     cursor = db_conn.cursor()
-    # cursor.execute("PRAGMA foreign_keys = ON;") # enable foreign key safety features
+    cursor.execute("PRAGMA foreign_keys = ON;") # enable foreign key safety features
 
     create_tables(cursor)
     initialise_table_data(cursor, db_conn)
